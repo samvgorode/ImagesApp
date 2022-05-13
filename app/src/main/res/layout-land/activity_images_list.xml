@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.samvgorode.shiftfourimages.presentation.list.ImagesListViewModel" />
+
+        <variable
+            name="goBack"
+            type="kotlin.jvm.functions.Function0" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".presentation.list.HistoryActivity">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/back"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="40dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="@{_ -> goBack.invoke() }"
+            android:padding="12dp"
+            android:src="@drawable/ic_arrow_white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/history"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginVertical="24dp"
+            android:orientation="horizontal"
+            android:paddingBottom="156dp"
+            android:visibility="@{viewModel.imagesList.size() > 0 ? View.VISIBLE : View.GONE}"
+            app:imagesHistory="@{viewModel.imagesList}"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/back"
+            tools:listitem="@layout/image_widget" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginVertical="24dp"
+            android:gravity="center"
+            android:text="@string/no_images_here"
+            android:textColor="@color/white"
+            android:textSize="72sp"
+            android:visibility="@{viewModel.imagesList.size() > 0 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/back"
+            tools:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
