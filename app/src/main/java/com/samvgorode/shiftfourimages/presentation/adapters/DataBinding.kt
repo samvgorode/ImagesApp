@@ -1,5 +1,6 @@
 package com.samvgorode.shiftfourimages.presentation.adapters
 
+import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.databinding.BindingAdapter
@@ -16,11 +17,25 @@ fun setSrsCoil(imageView: AppCompatImageView, srsCoil: String?) {
     }
 }
 
+@BindingAdapter("srsDrawable")
+fun setSrsCoil(imageView: AppCompatImageView, srsDrawable: Drawable?) {
+    if (srsDrawable != null) imageView.setImageDrawable(srsDrawable)
+}
+
 @BindingAdapter("images")
 fun setImagesHistory(recyclerView: RecyclerView, images: List<ImageUiModel>?) {
     if (images.isNullOrEmpty().not()) {
         if (recyclerView.adapter == null) recyclerView.adapter = ImagesAdapter()
-        (recyclerView.adapter as? ImagesAdapter)?.addImages(images!!)
+        (recyclerView.adapter as? ImagesAdapter)?.submitList(images!!)
+    }
+}
+
+@BindingAdapter("favoriteClick", "imageClick")
+fun setListeners(recyclerView: RecyclerView, favoriteClick: (String, Boolean) -> Unit, imageClick: (String) -> Unit) {
+    if (recyclerView.adapter == null) recyclerView.adapter = ImagesAdapter()
+    (recyclerView.adapter as? ImagesAdapter)?.let {
+        it.favoriteClick = favoriteClick
+        it.imageClick = imageClick
     }
 }
 

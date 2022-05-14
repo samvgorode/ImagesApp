@@ -9,7 +9,8 @@ class ImagesDomainMapper @Inject constructor() {
     fun map(imageEntity: ImageEntity): ImageUiModel {
         return ImageUiModel(
             id = imageEntity.id,
-            url = imageEntity.url.orEmpty()
+            url = imageEntity.url.orEmpty(),
+            favorite = imageEntity.favorite ?: false
         )
     }
 }

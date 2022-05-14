@@ -1,24 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
+        <import type="kotlin.Unit"/>
         <variable
             name="imageModel"
             type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
+        <variable
+            name="rootClick"
+            type="kotlin.jvm.functions.Function1&lt;String, Unit&gt;" />
+        <variable
+            name="favoriteClick"
+            type="kotlin.jvm.functions.Function2&lt;String, Boolean, Unit&gt;" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="400dp"
         android:layout_height="200dp"
         android:layout_marginHorizontal="8dp"
-        app:cardCornerRadius="16dp">
+        app:cardCornerRadius="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?selectableItemBackground"
+        android:onClick="@{_ -> rootClick.invoke(imageModel.id)}">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srsCoil="@{imageModel.url}" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginVertical="8dp"
+            android:layout_gravity="end|bottom"
+            tools:src="@drawable/ic_heart_filled"
+            android:onClick="@{_ -> favoriteClick.invoke(imageModel.id, !imageModel.favorite)}"
+            app:srsDrawable="@{imageModel.favorite ? @drawable/ic_heart_filled : @drawable/ic_heart_unfilled}" />
 
     </com.google.android.material.card.MaterialCardView>
 </layout>

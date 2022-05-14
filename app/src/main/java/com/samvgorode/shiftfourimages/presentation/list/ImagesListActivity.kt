@@ -1,14 +1,11 @@
 package com.samvgorode.shiftfourimages.presentation.list
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.lifecycleScope
 import com.samvgorode.shiftfourimages.databinding.ActivityImagesListBinding
-import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -19,14 +16,11 @@ class ImagesListActivity : AppCompatActivity() {
 
     private val viewModel: ImagesListViewModel by viewModels()
 
-    private val imagesList = ObservableField<List<ImageUiModel>>()
-    private val isLoading = ObservableBoolean()
-    private val isError = ObservableBoolean()
-    private val isStub = ObservableBoolean()
-    private var lastLoadedPage = 0
+    private val uiState = ObservableField<ImagesListUiState>()
+    private var lastLoadedPage = 1
     private val onLoadMoreCallback: (Int) -> Unit = {
         if (it > lastLoadedPage) {
-            sendIntent(it)
+            getImages(it)
             lastLoadedPage = it
         }
     }
@@ -34,12 +28,12 @@ class ImagesListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityImagesListBinding.inflate(layoutInflater).apply {
-            imagesList = this@ImagesListActivity.imagesList
-            isLoading = this@ImagesListActivity.isLoading
-            isError = this@ImagesListActivity.isError
-            isStub = this@ImagesListActivity.isStub
+            uiState = this@ImagesListActivity.uiState
             goBack = ::onBackPressed
             loadMore = onLoadMoreCallback
+            refresh = ::onRefresh
+            imageClick = ::onImageClick
+            favoriteClick = ::onFavoriteClick
             setContentView(root)
         }
     }
@@ -47,21 +41,31 @@ class ImagesListActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         observeViewModel()
-        sendIntent(1)
+        getImages(lastLoadedPage)
     }
 
-    private fun observeViewModel() {
+    private fun onRefresh() {
+        lastLoadedPage = 1
         lifecycleScope.launch {
-            viewModel.state.collect {
-                isLoading.set(it.isLoading)
-                isError.set(it.isError)
-                isStub.set(it.images.isEmpty())
-                imagesList.set(it.images)
-            }
+            viewModel.userIntent.send(ImagesListIntent.Refresh)
         }
     }
 
-    private fun sendIntent(page: Int) {
+    private fun onImageClick(id: String) {
+        // todo open full image screen
+    }
+
+    private fun onFavoriteClick(id: String, favorite: Boolean) {
+        lifecycleScope.launch {
+            viewModel.userIntent.send(ImagesListIntent.SetImageFavorite(id, favorite))
+        }
+    }
+
+    private fun observeViewModel() {
+        lifecycleScope.launch { viewModel.state.collect(uiState::set) }
+    }
+
+    private fun getImages(page: Int) {
         lifecycleScope.launch {
             viewModel.userIntent.send(ImagesListIntent.GetImagesList(page))
         }

@@ -3,6 +3,8 @@ package com.samvgorode.shiftfourimages.presentation.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.samvgorode.shiftfourimages.domain.GetImagesListUseCase
+import com.samvgorode.shiftfourimages.domain.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +16,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ImagesListViewModel @Inject constructor(
-    private val getImages: GetImagesListUseCase
+    private val getImages: GetImagesListUseCase,
+    private val setImageFavorite: SetImageFavoriteUseCase
 ) : ViewModel() {
 
     val userIntent = Channel<ImagesListIntent>(Channel.UNLIMITED)
@@ -28,25 +31,81 @@ class ImagesListViewModel @Inject constructor(
 
     private fun handleIntent() {
         viewModelScope.launch {
-            userIntent.consumeAsFlow().collect {
-                when (it) {
-                    is ImagesListIntent.GetImagesList -> getImagesList(it.page)
+            userIntent.consumeAsFlow().collect { intent ->
+                when (intent) {
+                    is ImagesListIntent.GetImagesList -> getImagesList(intent.page)
+                    is ImagesListIntent.Refresh -> refresh()
+                    is ImagesListIntent.SetImageFavorite -> setFavorite(intent.id, intent.favorite)
                 }
             }
         }
     }
 
-    private fun getImagesList(page: Int) {
+    // set favorite flag in SP and just update UI
+    private fun setFavorite(id: String, favorite: Boolean) {
+        setImageFavorite(id, favorite)
+        _state.update {
+            try {
+                val images = mutableListOf<ImageUiModel>()
+                _state.value.images.forEach {
+                    images.add(
+                        if (it.id == id) it.copy(favorite = it.favorite.not())
+                        else it
+                    )
+                }
+                _state.value.copy(
+                    isLoading = false,
+                    isError = false,
+                    images = images
+                )
+            } catch (e: Throwable) {
+                getErrorState()
+            }
+        }
+    }
+
+    // do refresh from 1 page
+    private fun refresh() {
         viewModelScope.launch {
-            _state.update { _state.value.copy(isLoading = true) }
+            _state.update { getLoadingState() }
             _state.update {
                 try {
-                    val images = getImages(page)
-                    _state.value.copy(isLoading = false, isError = false, images = images)
+                    val images = getImages(1)
+                    _state.value.copy(
+                        isLoading = false,
+                        isError = false,
+                        images = images
+                    )
                 } catch (e: Throwable) {
-                    _state.value.copy(isLoading = false, isError = true, images = listOf())
+                    getErrorState()
                 }
             }
         }
     }
+
+    // get 10 images for requested page
+    private fun getImagesList(page: Int) {
+        viewModelScope.launch {
+            _state.update { getLoadingState() }
+            _state.update {
+                try {
+                    val images = getImages(page)
+                    val currentImages = _state.value.images
+                    if (images.none { currentImages.contains(it) }) _state.value.copy(
+                        isLoading = false,
+                        isError = false,
+                        images = currentImages + images
+                    )
+                    else _state.value.copy(isLoading = false, isError = false)
+                } catch (e: Throwable) {
+                    getErrorState()
+                }
+            }
+        }
+    }
+
+    private fun getLoadingState() = _state.value.copy(isLoading = true)
+
+    private fun getErrorState() =
+        _state.value.copy(isLoading = false, isError = true, images = listOf())
 }
