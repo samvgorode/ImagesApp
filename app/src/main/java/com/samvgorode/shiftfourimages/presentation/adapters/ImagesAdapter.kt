@@ -6,8 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.samvgorode.shiftfourimages.databinding.ImageWidgetBinding
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 
-class ImagesAdapter(val list: List<ImageUiModel>) :
-    RecyclerView.Adapter<HistoryViewHolder>() {
+class ImagesAdapter : RecyclerView.Adapter<HistoryViewHolder>() {
+
+    private val list = mutableListOf<ImageUiModel>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder =
         ImageWidgetBinding
@@ -21,6 +22,11 @@ class ImagesAdapter(val list: List<ImageUiModel>) :
 
     override fun getItemCount(): Int = list.size
 
+    fun addImages(list: List<ImageUiModel>) {
+        val prevSize = this.list.size
+        this.list.addAll(list)
+        notifyItemRangeInserted(prevSize, list.size)
+    }
 }
 
 class HistoryViewHolder(private val binding: ImageWidgetBinding) :

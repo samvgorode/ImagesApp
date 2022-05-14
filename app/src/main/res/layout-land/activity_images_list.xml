@@ -5,20 +5,39 @@
     <data>
 
         <import type="android.view.View" />
+        <import type="androidx.databinding.ObservableField" />
+        <import type="androidx.databinding.ObservableBoolean" />
+        <import type="java.util.List" />
+        <import type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
+        <import type="kotlin.Unit" />
 
         <variable
-            name="viewModel"
-            type="com.samvgorode.shiftfourimages.presentation.list.ImagesListViewModel" />
+            name="imagesList"
+            type="ObservableField&lt;List&lt;ImageUiModel&gt;&gt;" />
+
+        <variable
+            name="isError"
+            type="ObservableBoolean" />
+
+        <variable
+            name="isLoading"
+            type="ObservableBoolean" />
 
         <variable
             name="goBack"
             type="kotlin.jvm.functions.Function0" />
+
+        <variable
+            name="loadMore"
+            type="kotlin.jvm.functions.Function1&lt;Integer, Unit&gt;" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".presentation.list.HistoryActivity">
+        tools:context=".presentation.list.ImagesListActivity"
+        android:focusableInTouchMode="true"
+        android:focusable="true">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/back"
@@ -35,20 +54,20 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/history"
-            android:layout_width="match_parent"
+            android:id="@+id/images"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="28dp"
             android:layout_marginVertical="24dp"
             android:orientation="horizontal"
-            android:paddingBottom="156dp"
-            android:visibility="@{viewModel.imagesList.size() > 0 ? View.VISIBLE : View.GONE}"
-            app:imagesHistory="@{viewModel.imagesList}"
+            android:visibility="@{imagesList.size() > 0 ? View.VISIBLE : View.GONE}"
+            app:images="@{imagesList}"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/back"
-            tools:listitem="@layout/image_widget" />
+            tools:listitem="@layout/image_widget"
+            app:onLoadMoreCallback="@{loadMore}"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/stub"
@@ -60,7 +79,38 @@
             android:text="@string/no_images_here"
             android:textColor="@color/white"
             android:textSize="72sp"
-            android:visibility="@{viewModel.imagesList.size() > 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{(isStub &amp;&amp; !isError) ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/back"
+            tools:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginVertical="24dp"
+            android:gravity="center"
+            android:text="@string/something_went_wrong"
+            android:textColor="@color/white"
+            android:textSize="72sp"
+            android:visibility="@{isError ? View.VISIBLE : View.GONE}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/back"
+            tools:visibility="gone" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="28dp"
+            android:layout_marginVertical="24dp"
+            android:gravity="center"
+            android:visibility="@{isLoading ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

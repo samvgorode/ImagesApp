@@ -1,13 +1,14 @@
 package com.samvgorode.shiftfourimages.presentation.list
 
-import android.util.Log
-import androidx.databinding.ObservableField
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.samvgorode.shiftfourimages.domain.GetImagesListUseCase
-import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,16 +17,36 @@ class ImagesListViewModel @Inject constructor(
     private val getImages: GetImagesListUseCase
 ) : ViewModel() {
 
-    val imagesList = ObservableField<List<ImageUiModel>>()
+    val userIntent = Channel<ImagesListIntent>(Channel.UNLIMITED)
 
-    private val handler = CoroutineExceptionHandler { _, exception ->
-        Log.e("", "CoroutineExceptionHandler got $exception")
-    }
+    private val _state = MutableStateFlow(ImagesListUiState())
+    val state: StateFlow<ImagesListUiState> get() = _state
 
     init {
-        viewModelScope.launch(handler) {
-            val history = getImages(1)
-            imagesList.set(history)
+        handleIntent()
+    }
+
+    private fun handleIntent() {
+        viewModelScope.launch {
+            userIntent.consumeAsFlow().collect {
+                when (it) {
+                    is ImagesListIntent.GetImagesList -> getImagesList(it.page)
+                }
+            }
+        }
+    }
+
+    private fun getImagesList(page: Int) {
+        viewModelScope.launch {
+            _state.update { _state.value.copy(isLoading = true) }
+            _state.update {
+                try {
+                    val images = getImages(page)
+                    _state.value.copy(isLoading = false, isError = false, images = images)
+                } catch (e: Throwable) {
+                    _state.value.copy(isLoading = false, isError = true, images = listOf())
+                }
+            }
         }
     }
 }

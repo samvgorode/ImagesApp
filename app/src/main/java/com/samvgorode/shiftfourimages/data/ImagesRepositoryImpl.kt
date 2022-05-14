@@ -18,8 +18,7 @@ class ImagesRepositoryImpl(
         val dbImages = images.map(dataMapper::map)
         val insert = imageDao.insertImages(dbImages)
         return@withContext if (insert.isNotEmpty()) imageDao.getAll(
-            LIMIT,
-            (page - 1) * LIMIT
+            LIMIT, (page - 1) * LIMIT
         ) else listOf()
     }
 

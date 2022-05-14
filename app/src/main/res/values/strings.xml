@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ImagesApp</string>
     <string name="no_images_here">No images here</string>
+    <string name="something_went_wrong">Something went wrong</string>
 </resources>
