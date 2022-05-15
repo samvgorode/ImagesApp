@@ -76,21 +76,14 @@ class ImageActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun onFavoriteClick(id: String, favorite: Boolean) {
         lifecycleScope.launch {
-            viewModel.userIntent.send(ImageIntent.SetImageFavorite(id, favorite))
+            viewModel.userIntent.send(ImageIntent.SetImageFavorite(favorite))
         }
     }
 
     private fun observeViewModel() {
         lifecycleScope.launch { viewModel.state.collect(uiState::set) }
-    }
-
-    companion object {
-        private const val IMAGE_EXTRA =
-            "com.samvgorode.shiftfourimages.presentation.image.IMAGE_EXTRA"
-
-        fun getIntent(context: AppCompatActivity) =
-            Intent(context, ImageActivity::class.java)
     }
 }

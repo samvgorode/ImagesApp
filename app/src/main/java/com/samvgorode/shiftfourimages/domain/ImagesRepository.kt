@@ -6,4 +6,5 @@ interface ImagesRepository {
     suspend fun getImages(page: Int): List<ImageEntity>
     fun setLastSelectedImage(image: ImageEntity)
     fun getLastSelectedImage(): ImageEntity?
+    suspend fun insertImage(image: ImageEntity)
 }

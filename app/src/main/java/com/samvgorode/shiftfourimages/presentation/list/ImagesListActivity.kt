@@ -7,6 +7,7 @@ import androidx.databinding.ObservableField
 import androidx.lifecycle.lifecycleScope
 import com.samvgorode.shiftfourimages.databinding.ActivityImagesListBinding
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
+import com.samvgorode.shiftfourimages.presentation.ext.startAnotherActivity
 import com.samvgorode.shiftfourimages.presentation.image.ImageActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -64,7 +65,7 @@ class ImagesListActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.userIntent.send(ImagesListIntent.SetImageSelected(imageModel))
         }
-        startActivity(ImageActivity.getIntent(this))
+        startAnotherActivity<ImageActivity>()
     }
 
     private fun onFavoriteClick(id: String, favorite: Boolean) {

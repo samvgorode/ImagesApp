@@ -49,14 +49,18 @@ class ImagesListViewModel @Inject constructor(
         }
     }
 
-    // set favorite flag in SP and just update UI
+    // set favorite flag in SP and Put model to Room and update UI
     private fun setFavorite(id: String, favorite: Boolean) {
-        setImageFavorite(id, favorite)
-        _state.update {
-            try {
-                setOrSwitchFavorite(id)
-            } catch (e: Throwable) {
-                getErrorState()
+        val image = _state.value.images.find { it.id == id }
+        val imageToSave = image?.copy(favorite = favorite)
+        if (imageToSave != null) {
+            viewModelScope.launch { setImageFavorite(imageToSave) }
+            _state.update {
+                try {
+                    setOrSwitchFavorite(id)
+                } catch (e: Throwable) {
+                    getErrorState()
+                }
             }
         }
     }

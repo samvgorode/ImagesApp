@@ -2,8 +2,8 @@ package com.samvgorode.shiftfourimages.presentation.image
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCase
 import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCase
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -33,7 +33,7 @@ class ImageViewModel @Inject constructor(
         viewModelScope.launch {
             userIntent.consumeAsFlow().collect { intent ->
                 when (intent) {
-                    is ImageIntent.SetImageFavorite -> setFavorite(intent.id, intent.favorite)
+                    is ImageIntent.SetImageFavorite -> setFavorite(intent.favorite)
                     is ImageIntent.GetSelectedImage -> getSelectedImage()
                 }
             }
@@ -52,16 +52,17 @@ class ImageViewModel @Inject constructor(
         }
     }
 
-    // set favorite flag in SP and just update UI
-    private fun setFavorite(id: String, favorite: Boolean) {
-        setImageFavorite(id, favorite)
+    // set favorite flag in SP and Put model to Room and update UI
+    private fun setFavorite(favorite: Boolean) {
+        val image = _state.value.image
+        val imageToSave = image.copy(favorite = favorite)
+        viewModelScope.launch { setImageFavorite(imageToSave) }
         _state.update {
             try {
-                val currentImage = _state.value.image
                 _state.value.copy(
                     isLoading = false,
                     isError = false,
-                    image = currentImage.copy(favorite = currentImage.favorite.not())
+                    image = imageToSave
                 )
             } catch (e: Throwable) {
                 getErrorState()

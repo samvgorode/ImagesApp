@@ -2,8 +2,11 @@ package com.samvgorode.shiftfourimages.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.samvgorode.shiftfourimages.data.DataMapper
 import com.samvgorode.shiftfourimages.data.ImagesRepositoryImpl
+import com.samvgorode.shiftfourimages.data.local.FavoriteImageDao
+import com.samvgorode.shiftfourimages.data.local.FavoriteImagesDatabase
 import com.samvgorode.shiftfourimages.data.remote.ApiService
 import com.samvgorode.shiftfourimages.domain.ImagesDomainMapper
 import com.samvgorode.shiftfourimages.domain.ImagesRepository
@@ -33,8 +36,19 @@ import javax.inject.Singleton
 object AppModule {
 
     private const val SP_NAME = "com.samvgorode.shiftfourimages.di.SharedPreferences"
+    private const val DB_NAME = "com.samvgorode.shiftfourimages.di.images_database"
     private const val BASE_URL = "https://api.unsplash.com/"
     private const val NETWORK_TIMEOUT_SECONDS = 10L
+
+    @Singleton
+    @Provides
+    fun provideDatabase(@ApplicationContext context: Context): FavoriteImagesDatabase =
+        Room.databaseBuilder(context, FavoriteImagesDatabase::class.java, DB_NAME)
+            .fallbackToDestructiveMigration()
+            .build()
+
+    @Provides
+    fun provideImageDao(database: FavoriteImagesDatabase): FavoriteImageDao = database.imageDao()
 
     @Singleton
     @Provides
@@ -67,8 +81,9 @@ object AppModule {
     @Provides
     fun provideImagesRepository(
         apiService: ApiService,
+        imagesDao: FavoriteImageDao,
         imageMapper: DataMapper
-    ): ImagesRepository = ImagesRepositoryImpl(apiService, imageMapper)
+    ): ImagesRepository = ImagesRepositoryImpl(apiService, imagesDao, imageMapper)
 
     @Provides
     fun provideGetImagesListUseCase(
@@ -78,8 +93,10 @@ object AppModule {
 
     @Provides
     fun provideSetImageFavoriteUseCase(
-        sharedPreferences: SharedPreferences
-    ): SetImageFavoriteUseCase = SetImageFavoriteUseCaseImpl(sharedPreferences)
+        sharedPreferences: SharedPreferences,
+        repository: ImagesRepository,
+        mapper: ImagesDomainMapper
+    ): SetImageFavoriteUseCase = SetImageFavoriteUseCaseImpl(sharedPreferences, repository, mapper)
 
     @Provides
     fun provideGetImageFavoriteUseCase(

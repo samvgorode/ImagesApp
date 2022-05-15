@@ -2,13 +2,16 @@ package com.samvgorode.shiftfourimages.presentation.ext
 
 import android.content.ContentResolver
 import android.content.ContentValues
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import com.samvgorode.shiftfourimages.presentation.image.ImageActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -47,3 +50,10 @@ fun saveImageInQ(bitmap: Bitmap, contentResolver: ContentResolver): Uri? {
     }
     return imageUri
 }
+
+/**
+ * receiver - starter activity
+ * T - target activity
+ */
+inline fun <reified T: AppCompatActivity> AppCompatActivity.startAnotherActivity() =
+    startActivity(Intent(this, T::class.java))
