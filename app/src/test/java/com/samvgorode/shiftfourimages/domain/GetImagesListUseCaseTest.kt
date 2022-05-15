@@ -2,6 +2,7 @@ package com.samvgorode.shiftfourimages.domain
 
 import com.samvgorode.shiftfourimages.TestStubs
 import com.samvgorode.shiftfourimages.data.local.ImageEntity
+import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCaseImpl
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import io.mockk.coVerify
 import io.mockk.mockk
@@ -22,10 +23,10 @@ class GetImagesListUseCaseTest {
         val imagesUiList = listOf(imagesUi)
         val repository: ImagesRepository = TestStubs.getImagesRepository(output1 = imagesDbList)
         val mapper = TestStubs.getDomainMapper(imagesDbList, imagesUiList)
-        val useCase = GetImagesListUseCase(repository, mapper)
+        val useCase = GetImagesListUseCaseImpl(repository, mapper)
         val result = useCase.invoke(1)
         coVerify { repository.getImages(1) }
-        verify(exactly = 1) { mapper.map(imagesDb) }
+        verify(exactly = 1) { mapper.mapToUi(imagesDb) }
         assertEquals(result.first(), imagesUi)
     }
 
@@ -35,10 +36,10 @@ class GetImagesListUseCaseTest {
         val imagesUiList = listOf<ImageUiModel>(mockk(), mockk(), mockk())
         val repository: ImagesRepository = TestStubs.getImagesRepository(output1 = imagesList)
         val mapper = TestStubs.getDomainMapper(imagesList, imagesUiList)
-        val useCase = GetImagesListUseCase(repository, mapper)
+        val useCase = GetImagesListUseCaseImpl(repository, mapper)
         val result = useCase.invoke(1)
         coVerify { repository.getImages(1) }
-        verify(exactly = 3) { mapper.map(any()) }
+        verify(exactly = 3) { mapper.mapToUi(any()) }
         assertEquals(result.size, imagesList.size)
     }
 
@@ -47,13 +48,13 @@ class GetImagesListUseCaseTest {
         val error = mockk<Throwable>()
         val repository: ImagesRepository = TestStubs.getImagesRepositoryError(output = error)
         val mapper = TestStubs.getDomainMapper()
-        val useCase = GetImagesListUseCase(repository, mapper)
+        val useCase = GetImagesListUseCaseImpl(repository, mapper)
         try {
             useCase.invoke(1)
         } catch (e: Throwable) {
             assertEquals(e, error)
         }
         coVerify { repository.getImages(1) }
-        verify(exactly = 0) { mapper.map(any()) }
+        verify(exactly = 0) { mapper.mapToUi(any()) }
     }
 }

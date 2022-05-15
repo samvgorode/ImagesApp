@@ -6,11 +6,15 @@ import javax.inject.Inject
 
 class ImagesDomainMapper @Inject constructor() {
 
-    fun map(imageEntity: ImageEntity): ImageUiModel {
-        return ImageUiModel(
-            id = imageEntity.id,
-            url = imageEntity.url.orEmpty(),
-            favorite = imageEntity.favorite ?: false
-        )
-    }
+    fun mapToUi(imageEntity: ImageEntity): ImageUiModel = ImageUiModel(
+        id = imageEntity.id,
+        url = imageEntity.url.orEmpty(),
+        favorite = imageEntity.favorite ?: false
+    )
+
+    fun mapToDomain(image: ImageUiModel): ImageEntity = ImageEntity(
+        id = image.id,
+        url = image.url,
+        favorite = image.favorite
+    )
 }

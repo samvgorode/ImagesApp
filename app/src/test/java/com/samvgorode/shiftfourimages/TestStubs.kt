@@ -26,11 +26,15 @@ object TestStubs {
     }
 
     fun getDomainMapper(
-        input: List<ImageEntity> = listOf(),
-        output: List<ImageUiModel> = listOf(),
+        domainList: List<ImageEntity> = listOf(),
+        uiList: List<ImageUiModel> = listOf(),
     ) = mockk<ImagesDomainMapper> {
-        input.forEachIndexed { index, image ->
-            every { map(image) } returns output.get(index)
+        domainList.forEachIndexed { index, image ->
+            every { mapToUi(image) } returns uiList.get(index)
+        }
+        uiList.forEachIndexed { index, image ->
+            every { mapToDomain(image) } returns domainList.get(index)
+
         }
     }
 }

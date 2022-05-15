@@ -7,6 +7,7 @@ import androidx.databinding.BindingAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.request.CachePolicy
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 
 @BindingAdapter("srsCoil")
@@ -31,7 +32,7 @@ fun setImagesHistory(recyclerView: RecyclerView, images: List<ImageUiModel>?) {
 }
 
 @BindingAdapter("favoriteClick", "imageClick")
-fun setListeners(recyclerView: RecyclerView, favoriteClick: (String, Boolean) -> Unit, imageClick: (String) -> Unit) {
+fun setListeners(recyclerView: RecyclerView, favoriteClick: (String, Boolean) -> Unit, imageClick: (ImageUiModel) -> Unit) {
     if (recyclerView.adapter == null) recyclerView.adapter = ImagesAdapter()
     (recyclerView.adapter as? ImagesAdapter)?.let {
         it.favoriteClick = favoriteClick
@@ -41,6 +42,7 @@ fun setListeners(recyclerView: RecyclerView, favoriteClick: (String, Boolean) ->
 
 @BindingAdapter("onLoadMoreCallback")
 fun setOnLoadMoreCallback(recyclerView: RecyclerView, onLoadMoreCallback: (page: Int) -> Unit) {
+    val defaultLimit = 10
     recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
@@ -49,8 +51,8 @@ fun setOnLoadMoreCallback(recyclerView: RecyclerView, onLoadMoreCallback: (page:
                 ?: RecyclerView.NO_POSITION
             if (position != RecyclerView.NO_POSITION) {
                 val positionToCalculateFrom = position + 1
-                if (positionToCalculateFrom >= 10 && positionToCalculateFrom % 10 == 0)
-                    onLoadMoreCallback.invoke(positionToCalculateFrom / 10 + 1)
+                if (positionToCalculateFrom >= defaultLimit && positionToCalculateFrom % defaultLimit == 0)
+                    onLoadMoreCallback.invoke(positionToCalculateFrom / defaultLimit + 1)
             }
         }
     })

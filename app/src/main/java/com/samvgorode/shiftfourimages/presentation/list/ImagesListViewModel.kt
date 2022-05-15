@@ -2,8 +2,11 @@ package com.samvgorode.shiftfourimages.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.samvgorode.shiftfourimages.domain.GetImagesListUseCase
-import com.samvgorode.shiftfourimages.domain.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.favorite.GetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCase
+import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCase
+import com.samvgorode.shiftfourimages.domain.lastSelected.SetSelectedImageUseCase
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +20,10 @@ import javax.inject.Inject
 @HiltViewModel
 class ImagesListViewModel @Inject constructor(
     private val getImages: GetImagesListUseCase,
-    private val setImageFavorite: SetImageFavoriteUseCase
+    private val setImageFavorite: SetImageFavoriteUseCase,
+    private val getImageFavorite: GetImageFavoriteUseCase,
+    private val setSelectedImageUseCase: SetSelectedImageUseCase,
+    private val getSelectedImageUseCase: GetSelectedImageUseCase,
 ) : ViewModel() {
 
     val userIntent = Channel<ImagesListIntent>(Channel.UNLIMITED)
@@ -36,6 +42,8 @@ class ImagesListViewModel @Inject constructor(
                     is ImagesListIntent.GetImagesList -> getImagesList(intent.page)
                     is ImagesListIntent.Refresh -> refresh()
                     is ImagesListIntent.SetImageFavorite -> setFavorite(intent.id, intent.favorite)
+                    is ImagesListIntent.SetImageSelected -> setSelectedImageUseCase(intent.image)
+                    is ImagesListIntent.RefreshLastSelectedImage -> refreshSelectedImage()
                 }
             }
         }
@@ -46,18 +54,7 @@ class ImagesListViewModel @Inject constructor(
         setImageFavorite(id, favorite)
         _state.update {
             try {
-                val images = mutableListOf<ImageUiModel>()
-                _state.value.images.forEach {
-                    images.add(
-                        if (it.id == id) it.copy(favorite = it.favorite.not())
-                        else it
-                    )
-                }
-                _state.value.copy(
-                    isLoading = false,
-                    isError = false,
-                    images = images
-                )
+                setOrSwitchFavorite(id)
             } catch (e: Throwable) {
                 getErrorState()
             }
@@ -102,6 +99,30 @@ class ImagesListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun refreshSelectedImage() {
+        viewModelScope.launch {
+            getSelectedImageUseCase()?.id?.let { lastSelectedId ->
+                val isFavorite = getImageFavorite(lastSelectedId)
+                _state.update { setOrSwitchFavorite(lastSelectedId, isFavorite) }
+            }
+        }
+    }
+
+    private fun setOrSwitchFavorite(id: String, favorite: Boolean? = null): ImagesListUiState {
+        val images = mutableListOf<ImageUiModel>()
+        _state.value.images.forEach {
+            images.add(
+                if (it.id == id) it.copy(favorite = favorite ?: it.favorite.not())
+                else it
+            )
+        }
+        return _state.value.copy(
+            isLoading = false,
+            isError = false,
+            images = images
+        )
     }
 
     private fun getLoadingState() = _state.value.copy(isLoading = true)

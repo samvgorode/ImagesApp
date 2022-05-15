@@ -1,6 +1,5 @@
 package com.samvgorode.shiftfourimages.data
 
-import com.samvgorode.shiftfourimages.data.local.ImageDao
 import com.samvgorode.shiftfourimages.data.local.ImageEntity
 import com.samvgorode.shiftfourimages.data.remote.ApiService
 import com.samvgorode.shiftfourimages.data.remote.ImagesResponseItem
@@ -16,34 +15,28 @@ class ImagesRepositoryImplTest {
     @Test
     fun `getImages should return images list`() = runTest {
         val imagesList = listOf<ImageEntity>(mockk(), mockk(), mockk())
-        val apiService = getApiService()
-        val dataMapper = getDataMapper()
-        val imagesDao = getImageDao(output = imagesList)
-        val repositoryImpl = ImagesRepositoryImpl(apiService, imagesDao, dataMapper)
+        val response =  listOf<ImagesResponseItem>(mockk(), mockk(), mockk())
+        val apiService = getApiService(response)
+        val dataMapper = getDataMapper(response, imagesList)
+        val repositoryImpl = ImagesRepositoryImpl(apiService, dataMapper)
         val images = repositoryImpl.getImages(1)
 
         coVerify(exactly = 1) { apiService.getImages(any(), any(), any()) }
-        verify(exactly = 1) { dataMapper.map(any()) }
-        coVerify { imagesDao.getAll(any(), any()) }
+        verify(exactly = imagesList.size) { dataMapper.map(any()) }
 
         assertEquals(images, imagesList)
     }
 
-    private fun getApiService(output: ImagesResponseItem = mockk()) = mockk<ApiService> {
-        coEvery { getImages(any(), any(), any()) } returns listOf(output)
+    private fun getApiService(output: List<ImagesResponseItem>) = mockk<ApiService> {
+        coEvery { getImages(any(), any(), any()) } returns output
     }
 
     private fun getDataMapper(
-        output: ImageEntity = mockk()
+        input: List<ImagesResponseItem>,
+        output: List<ImageEntity>
     ) = mockk<DataMapper> {
-        every { map(any()) } returns output
-    }
-
-    private fun getImageDao(
-        input: ImageEntity = mockk(),
-        output: List<ImageEntity> = listOf()
-    ) = mockk<ImageDao> {
-        coEvery { getAll(any(), any()) } returns output
-        coEvery { insertImages(any()) } returns listOf(1L)
+        if(input.size == output.size) input.forEachIndexed { index, image ->
+            every { map(image) } returns output[index]
+        }
     }
 }

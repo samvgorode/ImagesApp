@@ -6,15 +6,23 @@ import com.samvgorode.shiftfourimages.domain.ImagesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ImagesRepositoryImpl(
+internal class ImagesRepositoryImpl(
     private val apiService: ApiService,
     private val dataMapper: DataMapper
 ) : ImagesRepository {
+
+    private var lastSelectedImage: ImageEntity? = null
 
     override suspend fun getImages(page: Int): List<ImageEntity> = withContext(Dispatchers.IO) {
         val images = apiService.getImages(page, LIMIT, CLIENT_ID)
         return@withContext images.map(dataMapper::map)
     }
+
+    override fun setLastSelectedImage(image: ImageEntity) {
+        lastSelectedImage = image
+    }
+
+    override fun getLastSelectedImage() = lastSelectedImage
 
     private companion object {
         const val CLIENT_ID = "8OSta1KUPT104fmjBEdTOA4TRQFsULhrYsOP84Om0kM"

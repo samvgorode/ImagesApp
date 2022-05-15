@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ObservableField
 import androidx.lifecycle.lifecycleScope
 import com.samvgorode.shiftfourimages.databinding.ActivityImagesListBinding
+import com.samvgorode.shiftfourimages.presentation.ImageUiModel
+import com.samvgorode.shiftfourimages.presentation.image.ImageActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -44,6 +46,13 @@ class ImagesListActivity : AppCompatActivity() {
         getImages(lastLoadedPage)
     }
 
+    override fun onResume() {
+        super.onResume()
+        lifecycleScope.launch {
+            viewModel.userIntent.send(ImagesListIntent.RefreshLastSelectedImage)
+        }
+    }
+
     private fun onRefresh() {
         lastLoadedPage = 1
         lifecycleScope.launch {
@@ -51,8 +60,11 @@ class ImagesListActivity : AppCompatActivity() {
         }
     }
 
-    private fun onImageClick(id: String) {
-        // todo open full image screen
+    private fun onImageClick(imageModel: ImageUiModel) {
+        lifecycleScope.launch {
+            viewModel.userIntent.send(ImagesListIntent.SetImageSelected(imageModel))
+        }
+        startActivity(ImageActivity.getIntent(this))
     }
 
     private fun onFavoriteClick(id: String, favorite: Boolean) {

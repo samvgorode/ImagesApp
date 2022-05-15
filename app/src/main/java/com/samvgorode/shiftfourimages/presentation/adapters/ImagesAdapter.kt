@@ -11,7 +11,7 @@ import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 class ImagesAdapter : ListAdapter<ImageUiModel, HistoryViewHolder>(callback) {
 
     var favoriteClick: ((String, Boolean) -> Unit)? = null
-    var imageClick: ((String) -> Unit)? = null
+    var imageClick: ((ImageUiModel) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -52,7 +52,7 @@ class HistoryViewHolder(private val binding: ImageWidgetBinding) :
     fun bind(imageModel: ImageUiModel) {
         binding.imageModel = imageModel
     }
-    fun setListeners(favoriteClick: ((String, Boolean) -> Unit)?, imageClick: ((String) -> Unit)?) {
+    fun setListeners(favoriteClick: ((String, Boolean) -> Unit)?, imageClick: ((ImageUiModel) -> Unit)?) {
         binding.rootClick = imageClick
         binding.favoriteClick = favoriteClick
     }

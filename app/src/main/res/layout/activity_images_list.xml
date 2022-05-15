@@ -4,38 +4,35 @@
 
     <data>
 
-        <import type="android.view.View" />
-
-        <import type="androidx.databinding.ObservableField" />
-
-        <import type="androidx.databinding.ObservableBoolean" />
-
-        <import type="java.util.List" />
-
-        <import type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
-
+        <import type="kotlin.jvm.functions.Function0" />
+        <import type="kotlin.jvm.functions.Function1" />
+        <import type="kotlin.jvm.functions.Function2" />
         <import type="kotlin.Unit" />
-
+        <import type="android.view.View" />
+        <import type="androidx.databinding.ObservableField" />
+        <import type="androidx.databinding.ObservableBoolean" />
+        <import type="java.util.List" />
+        <import type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
         <import type="com.samvgorode.shiftfourimages.presentation.list.ImagesListUiState" />
 
         <variable
             name="uiState"
-            type="androidx.databinding.ObservableField&lt;ImagesListUiState&gt;" />
+            type="ObservableField&lt;ImagesListUiState&gt;" />
 
         <variable
             name="loadMore"
-            type="kotlin.jvm.functions.Function1&lt;Integer, Unit&gt;" />
+            type="Function1&lt;Integer, Unit&gt;" />
 
         <variable
             name="refresh"
-            type="kotlin.jvm.functions.Function0" />
+            type="Function0" />
 
         <variable
             name="imageClick"
-            type="kotlin.jvm.functions.Function1&lt;String, Unit&gt;" />
+            type="Function1&lt;ImageUiModel, Unit&gt;" />
         <variable
             name="favoriteClick"
-            type="kotlin.jvm.functions.Function2&lt;String, Boolean, Unit&gt;" />
+            type="Function2&lt;String, Boolean, Unit&gt;" />
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:tools="http://schemas.android.com/tools"

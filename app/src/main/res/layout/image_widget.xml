@@ -4,29 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="kotlin.Unit"/>
+
+        <import type="kotlin.Unit" />
+        <import type="kotlin.jvm.functions.Function1" />
+        <import type="kotlin.jvm.functions.Function2" />
+        <import type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
         <variable
             name="imageModel"
-            type="com.samvgorode.shiftfourimages.presentation.ImageUiModel" />
+            type="ImageUiModel" />
         <variable
             name="rootClick"
-            type="kotlin.jvm.functions.Function1&lt;String, Unit&gt;" />
+            type="Function1&lt;ImageUiModel, Unit&gt;" />
         <variable
             name="favoriteClick"
-            type="kotlin.jvm.functions.Function2&lt;String, Boolean, Unit&gt;" />
+            type="Function2&lt;String, Boolean, Unit&gt;" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginVertical="8dp"
-        app:cardCornerRadius="16dp"
         android:clickable="true"
         android:focusable="true"
         android:foreground="?selectableItemBackground"
-        android:onClick="@{_ -> rootClick.invoke(imageModel.id)}">
+        android:onClick="@{_ -> rootClick.invoke(imageModel)}"
+        app:cardCornerRadius="16dp">
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srsCoil="@{imageModel.url}" />
@@ -34,12 +39,12 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
+            android:layout_gravity="end|bottom"
             android:layout_marginHorizontal="8dp"
             android:layout_marginVertical="8dp"
-            android:layout_gravity="end|bottom"
-            tools:src="@drawable/ic_heart_filled"
             android:onClick="@{_ -> favoriteClick.invoke(imageModel.id, !imageModel.favorite)}"
-            app:srsDrawable="@{imageModel.favorite ? @drawable/ic_heart_filled : @drawable/ic_heart_unfilled}" />
+            app:srsDrawable="@{imageModel.favorite ? @drawable/ic_heart_filled : @drawable/ic_heart_unfilled}"
+            tools:src="@drawable/ic_heart_filled" />
 
     </com.google.android.material.card.MaterialCardView>
 </layout>

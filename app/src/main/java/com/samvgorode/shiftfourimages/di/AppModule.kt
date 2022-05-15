@@ -5,7 +5,18 @@ import android.content.SharedPreferences
 import com.samvgorode.shiftfourimages.data.DataMapper
 import com.samvgorode.shiftfourimages.data.ImagesRepositoryImpl
 import com.samvgorode.shiftfourimages.data.remote.ApiService
+import com.samvgorode.shiftfourimages.domain.ImagesDomainMapper
 import com.samvgorode.shiftfourimages.domain.ImagesRepository
+import com.samvgorode.shiftfourimages.domain.favorite.GetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.favorite.GetImageFavoriteUseCaseImpl
+import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCase
+import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCaseImpl
+import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCase
+import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCaseImpl
+import com.samvgorode.shiftfourimages.domain.lastSelected.SetSelectedImageUseCase
+import com.samvgorode.shiftfourimages.domain.lastSelected.SetSelectedImageUseCaseImpl
+import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -58,4 +69,32 @@ object AppModule {
         apiService: ApiService,
         imageMapper: DataMapper
     ): ImagesRepository = ImagesRepositoryImpl(apiService, imageMapper)
+
+    @Provides
+    fun provideGetImagesListUseCase(
+        repository: ImagesRepository,
+        mapper: ImagesDomainMapper
+    ): GetImagesListUseCase = GetImagesListUseCaseImpl(repository, mapper)
+
+    @Provides
+    fun provideSetImageFavoriteUseCase(
+        sharedPreferences: SharedPreferences
+    ): SetImageFavoriteUseCase = SetImageFavoriteUseCaseImpl(sharedPreferences)
+
+    @Provides
+    fun provideGetImageFavoriteUseCase(
+        sharedPreferences: SharedPreferences
+    ): GetImageFavoriteUseCase = GetImageFavoriteUseCaseImpl(sharedPreferences)
+
+    @Provides
+    fun provideGetSelectedImageUseCase(
+        repository: ImagesRepository,
+        mapper: ImagesDomainMapper
+    ): GetSelectedImageUseCase = GetSelectedImageUseCaseImpl(repository, mapper)
+
+    @Provides
+    fun provideSetSelectedImageUseCase(
+        repository: ImagesRepository,
+        mapper: ImagesDomainMapper
+    ): SetSelectedImageUseCase = SetSelectedImageUseCaseImpl(repository, mapper)
 }
