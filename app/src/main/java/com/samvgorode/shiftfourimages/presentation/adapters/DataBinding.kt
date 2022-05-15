@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.request.CachePolicy
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.samvgorode.shiftfourimages.R
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 
 @BindingAdapter("srsCoil")
@@ -56,4 +58,16 @@ fun setOnLoadMoreCallback(recyclerView: RecyclerView, onLoadMoreCallback: (page:
             }
         }
     })
+}
+
+@BindingAdapter("click")
+fun setClickListener(floatingButton: ExtendedFloatingActionButton, click: (String) -> Unit) {
+    val context = floatingButton.context
+    val showAll = context.getString(R.string.show_all)
+    val showFavorites = context.getString(R.string.show_favorites)
+    floatingButton.setOnClickListener {
+        val newText = if(floatingButton.text == showFavorites) showAll else showFavorites
+        floatingButton.text = newText
+        click.invoke(newText)
+    }
 }

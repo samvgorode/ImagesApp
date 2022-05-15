@@ -5,6 +5,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.ObservableField
 import androidx.lifecycle.lifecycleScope
+import com.samvgorode.shiftfourimages.R
 import com.samvgorode.shiftfourimages.databinding.ActivityImagesListBinding
 import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 import com.samvgorode.shiftfourimages.presentation.ext.startAnotherActivity
@@ -37,6 +38,7 @@ class ImagesListActivity : AppCompatActivity() {
             refresh = ::onRefresh
             imageClick = ::onImageClick
             favoriteClick = ::onFavoriteClick
+            switchList = ::switchList
             setContentView(root)
         }
     }
@@ -56,9 +58,9 @@ class ImagesListActivity : AppCompatActivity() {
 
     private fun onRefresh() {
         lastLoadedPage = 1
-        lifecycleScope.launch {
-            viewModel.userIntent.send(ImagesListIntent.Refresh)
-        }
+        val switchBtnText = binding?.switchBtn?.text
+        if(switchBtnText == getString(R.string.show_favorites)) refresh()
+        else showFavorites()
     }
 
     private fun onImageClick(imageModel: ImageUiModel) {
@@ -74,13 +76,23 @@ class ImagesListActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeViewModel() {
-        lifecycleScope.launch { viewModel.state.collect(uiState::set) }
+    private fun switchList(btnText: String) {
+        if(btnText == getString(R.string.show_favorites)) onRefresh()
+        else showFavorites()
     }
 
-    private fun getImages(page: Int) {
-        lifecycleScope.launch {
-            viewModel.userIntent.send(ImagesListIntent.GetImagesList(page))
-        }
+    private fun observeViewModel() = lifecycleScope.launch { viewModel.state.collect(uiState::set) }
+
+
+    private fun getImages(page: Int) = lifecycleScope.launch {
+        viewModel.userIntent.send(ImagesListIntent.GetImagesList(page))
+    }
+
+    private fun showFavorites() {
+        lifecycleScope.launch { viewModel.userIntent.send(ImagesListIntent.ShowJustFavorites) }
+    }
+
+    private fun refresh() {
+        lifecycleScope.launch { viewModel.userIntent.send(ImagesListIntent.Refresh) }
     }
 }

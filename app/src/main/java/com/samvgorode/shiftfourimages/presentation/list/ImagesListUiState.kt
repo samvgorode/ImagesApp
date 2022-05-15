@@ -5,5 +5,6 @@ import com.samvgorode.shiftfourimages.presentation.ImageUiModel
 data class ImagesListUiState (
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val images: List<ImageUiModel> = listOf()
+    val images: List<ImageUiModel> = listOf(),
+    val showJustFavorites: Boolean = false
 )

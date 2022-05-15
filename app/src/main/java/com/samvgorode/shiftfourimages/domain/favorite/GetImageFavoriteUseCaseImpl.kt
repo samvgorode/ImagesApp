@@ -1,11 +1,10 @@
 package com.samvgorode.shiftfourimages.domain.favorite
 
-import android.content.SharedPreferences
-import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.ImagesRepository
 
-internal class GetImageFavoriteUseCaseImpl(private val sharedPreferences: SharedPreferences) :
+internal class GetImageFavoriteUseCaseImpl(private val repository: ImagesRepository) :
     GetImageFavoriteUseCase {
 
-    override operator fun invoke(id: String): Boolean =
-        sharedPreferences.getBoolean(id, false)
+    override suspend operator fun invoke(id: String): Boolean =
+        repository.getImageFavorite(id)
 }

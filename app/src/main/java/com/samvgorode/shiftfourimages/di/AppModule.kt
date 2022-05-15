@@ -10,16 +10,15 @@ import com.samvgorode.shiftfourimages.data.local.FavoriteImagesDatabase
 import com.samvgorode.shiftfourimages.data.remote.ApiService
 import com.samvgorode.shiftfourimages.domain.ImagesDomainMapper
 import com.samvgorode.shiftfourimages.domain.ImagesRepository
-import com.samvgorode.shiftfourimages.domain.favorite.GetImageFavoriteUseCase
+import com.samvgorode.shiftfourimages.domain.favorite.*
 import com.samvgorode.shiftfourimages.domain.favorite.GetImageFavoriteUseCaseImpl
+import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCaseImpl
 import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCase
 import com.samvgorode.shiftfourimages.domain.getList.GetImagesListUseCaseImpl
 import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCase
 import com.samvgorode.shiftfourimages.domain.lastSelected.GetSelectedImageUseCaseImpl
 import com.samvgorode.shiftfourimages.domain.lastSelected.SetSelectedImageUseCase
 import com.samvgorode.shiftfourimages.domain.lastSelected.SetSelectedImageUseCaseImpl
-import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCase
-import com.samvgorode.shiftfourimages.domain.favorite.SetImageFavoriteUseCaseImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,8 +81,9 @@ object AppModule {
     fun provideImagesRepository(
         apiService: ApiService,
         imagesDao: FavoriteImageDao,
-        imageMapper: DataMapper
-    ): ImagesRepository = ImagesRepositoryImpl(apiService, imagesDao, imageMapper)
+        imageMapper: DataMapper,
+        sharedPreferences: SharedPreferences
+    ): ImagesRepository = ImagesRepositoryImpl(apiService, imagesDao, imageMapper, sharedPreferences)
 
     @Provides
     fun provideGetImagesListUseCase(
@@ -93,15 +93,14 @@ object AppModule {
 
     @Provides
     fun provideSetImageFavoriteUseCase(
-        sharedPreferences: SharedPreferences,
         repository: ImagesRepository,
         mapper: ImagesDomainMapper
-    ): SetImageFavoriteUseCase = SetImageFavoriteUseCaseImpl(sharedPreferences, repository, mapper)
+    ): SetImageFavoriteUseCase = SetImageFavoriteUseCaseImpl(repository, mapper)
 
     @Provides
     fun provideGetImageFavoriteUseCase(
-        sharedPreferences: SharedPreferences
-    ): GetImageFavoriteUseCase = GetImageFavoriteUseCaseImpl(sharedPreferences)
+        repository: ImagesRepository
+    ): GetImageFavoriteUseCase = GetImageFavoriteUseCaseImpl(repository)
 
     @Provides
     fun provideGetSelectedImageUseCase(
@@ -114,4 +113,10 @@ object AppModule {
         repository: ImagesRepository,
         mapper: ImagesDomainMapper
     ): SetSelectedImageUseCase = SetSelectedImageUseCaseImpl(repository, mapper)
+
+    @Provides
+    fun provideGetAllImagesFavoriteUseCase(
+        repository: ImagesRepository,
+        mapper: ImagesDomainMapper
+    ): GetAllImagesFavoriteUseCase = GetAllImagesFavoriteUseCaseImpl(repository, mapper)
 }

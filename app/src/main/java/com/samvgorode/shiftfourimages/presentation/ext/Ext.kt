@@ -57,3 +57,5 @@ fun saveImageInQ(bitmap: Bitmap, contentResolver: ContentResolver): Uri? {
  */
 inline fun <reified T: AppCompatActivity> AppCompatActivity.startAnotherActivity() =
     startActivity(Intent(this, T::class.java))
+
+fun Boolean?.orFalse() = this ?: false

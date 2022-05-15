@@ -4,4 +4,7 @@
     <string name="something_went_wrong">Something went wrong</string>
     <string name="go_back">Go back</string>
     <string name="share">Share</string>
+    <string name="favorites_switcher">Favorites Switcher</string>
+    <string name="show_favorites">Show favorites</string>
+    <string name="show_all">Show all</string>
 </resources>

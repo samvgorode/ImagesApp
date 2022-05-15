@@ -8,4 +8,5 @@ sealed class ImagesListIntent {
     data class SetImageFavorite(val id: String, val favorite: Boolean) : ImagesListIntent()
     data class SetImageSelected(val image: ImageUiModel) : ImagesListIntent()
     object RefreshLastSelectedImage : ImagesListIntent()
+    object ShowJustFavorites : ImagesListIntent()
 }

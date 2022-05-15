@@ -1,5 +1,7 @@
 package com.samvgorode.shiftfourimages.data
 
+import android.content.SharedPreferences
+import com.samvgorode.shiftfourimages.data.local.FavoriteImageDao
 import com.samvgorode.shiftfourimages.data.local.ImageEntity
 import com.samvgorode.shiftfourimages.data.remote.ApiService
 import com.samvgorode.shiftfourimages.data.remote.ImagesResponseItem
@@ -18,7 +20,9 @@ class ImagesRepositoryImplTest {
         val response =  listOf<ImagesResponseItem>(mockk(), mockk(), mockk())
         val apiService = getApiService(response)
         val dataMapper = getDataMapper(response, imagesList)
-        val repositoryImpl = ImagesRepositoryImpl(apiService, dataMapper)
+        val imageDao: FavoriteImageDao = mockk()
+        val sp: SharedPreferences = mockk()
+        val repositoryImpl = ImagesRepositoryImpl(apiService, imageDao, dataMapper, sp)
         val images = repositoryImpl.getImages(1)
 
         coVerify(exactly = 1) { apiService.getImages(any(), any(), any()) }
