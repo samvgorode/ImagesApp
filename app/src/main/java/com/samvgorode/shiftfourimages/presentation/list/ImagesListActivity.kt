@@ -22,11 +22,10 @@ class ImagesListActivity : AppCompatActivity() {
 
     private val uiState = ObservableField<ImagesListUiState>()
     private var lastLoadedPage = 1
-    private val onLoadMoreCallback: (Int) -> Unit = {
-        if (it > lastLoadedPage) {
-            getImages(it)
-            lastLoadedPage = it
-        }
+
+    private val onLoadMoreCallback: () -> Unit = {
+        val nextPageNumber = lastLoadedPage + 1
+        getImages(nextPageNumber)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +58,7 @@ class ImagesListActivity : AppCompatActivity() {
     private fun onRefresh() {
         lastLoadedPage = 1
         val switchBtnText = binding?.switchBtn?.text
-        if(switchBtnText == getString(R.string.show_favorites)) refresh()
+        if (switchBtnText == getString(R.string.show_favorites)) refresh()
         else showFavorites()
     }
 
@@ -77,12 +76,19 @@ class ImagesListActivity : AppCompatActivity() {
     }
 
     private fun switchList(btnText: String) {
-        if(btnText == getString(R.string.show_favorites)) onRefresh()
+        if (btnText == getString(R.string.show_favorites)) onRefresh()
         else showFavorites()
     }
 
-    private fun observeViewModel() = lifecycleScope.launch { viewModel.state.collect(uiState::set) }
-
+    private fun observeViewModel() = lifecycleScope.launch {
+        viewModel.state.collect {
+            if(it.images.isNotEmpty()) {
+                val paginationLimit = resources.getInteger(R.integer.default_pagination_limit)
+                lastLoadedPage = it.images.size / paginationLimit
+            }
+            uiState.set(it)
+        }
+    }
 
     private fun getImages(page: Int) = lifecycleScope.launch {
         viewModel.userIntent.send(ImagesListIntent.GetImagesList(page))

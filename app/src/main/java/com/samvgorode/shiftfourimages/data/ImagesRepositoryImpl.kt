@@ -19,7 +19,7 @@ internal class ImagesRepositoryImpl(
     private var lastSelectedImage: ImageEntity? = null
 
     override suspend fun getImages(page: Int): List<ImageEntity> = withContext(Dispatchers.IO) {
-        val images = apiService.getImages(page, LIMIT, CLIENT_ID)
+        val images = apiService.getImages(page, CLIENT_ID)
         images.map(dataMapper::map)
     }
 
@@ -43,7 +43,8 @@ internal class ImagesRepositoryImpl(
     }
 
     private companion object {
-        const val CLIENT_ID = "8OSta1KUPT104fmjBEdTOA4TRQFsULhrYsOP84Om0kM"
-        const val LIMIT = 10
+        // if one key inactive - use another (limit - 50 requests per hour!)
+        // const val CLIENT_ID = "8OSta1KUPT104fmjBEdTOA4TRQFsULhrYsOP84Om0kM"
+        const val CLIENT_ID = "OuBDDQKwsvso-cjES67ha5EUoY55Mx5F-1035mFaqr8"
     }
 }

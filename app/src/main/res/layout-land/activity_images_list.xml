@@ -24,7 +24,7 @@
             type="ObservableField&lt;ImagesListUiState&gt;" />
         <variable
             name="loadMore"
-            type="Function1&lt;Integer, Unit&gt;" />
+            type="Function0&lt;Unit&gt;" />
         <variable
             name="refresh"
             type="Function0" />
