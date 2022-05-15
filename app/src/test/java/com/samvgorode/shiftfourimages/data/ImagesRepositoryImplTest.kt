@@ -25,14 +25,14 @@ class ImagesRepositoryImplTest {
         val repositoryImpl = ImagesRepositoryImpl(apiService, imageDao, dataMapper, sp)
         val images = repositoryImpl.getImages(1)
 
-        coVerify(exactly = 1) { apiService.getImages(any(), any(), any()) }
+        coVerify(exactly = 1) { apiService.getImages(any(),any()) }
         verify(exactly = imagesList.size) { dataMapper.map(any()) }
 
         assertEquals(images, imagesList)
     }
 
     private fun getApiService(output: List<ImagesResponseItem>) = mockk<ApiService> {
-        coEvery { getImages(any(), any(), any()) } returns output
+        coEvery { getImages(any(), any()) } returns output
     }
 
     private fun getDataMapper(
