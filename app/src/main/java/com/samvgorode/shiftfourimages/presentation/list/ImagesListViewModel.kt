@@ -37,6 +37,9 @@ class ImagesListViewModel @Inject constructor(
         handleIntent()
     }
 
+    /**
+     * Method handles all intents from Activity
+     */
     private fun handleIntent() {
         viewModelScope.launch {
             userIntent.consumeAsFlow().collect { intent ->
@@ -52,7 +55,14 @@ class ImagesListViewModel @Inject constructor(
         }
     }
 
-    // set favorite flag in SP and Put model to Room and update UI
+    /**
+     * Method sets image with
+     * @param id
+     * @param favorite flag via use case,
+     * it will be stored in SP for quick access
+     * and in DB for showing favorites list later.
+     * After that UI is updated.
+     */
     private fun setFavorite(id: String, favorite: Boolean) {
         val image = _state.value.images.find { it.id == id }
         val imageToSave = image?.copy(favorite = favorite)
@@ -68,7 +78,12 @@ class ImagesListViewModel @Inject constructor(
         }
     }
 
-    // do refresh from 1 page
+    /**
+     * Method resets UI state
+     * and requests images for the first page.
+     * Existing list will be lost.
+     * New list will be 10 items long.
+     */
     private fun refresh() {
         viewModelScope.launch {
             _state.update { getLoadingState() }
@@ -88,28 +103,37 @@ class ImagesListViewModel @Inject constructor(
         }
     }
 
-    // get 10 images for requested page
+    /**
+     * Get 10 images by default for
+     * @param page
+     * new images are zipped with already added
+     */
     private fun getImagesList(page: Int) {
-        if(_state.value.showJustFavorites.not())
-        viewModelScope.launch {
-            _state.update { getLoadingState() }
-            _state.update {
-                try {
-                    val images = getImages(page)
-                    val currentImages = _state.value.images
-                    if (images.none { currentImages.contains(it) }) _state.value.copy(
-                        isLoading = false,
-                        isError = false,
-                        images = currentImages + images
-                    )
-                    else _state.value.copy(isLoading = false, isError = false)
-                } catch (e: Throwable) {
-                    getErrorState()
+        if (_state.value.showJustFavorites.not())
+            viewModelScope.launch {
+                _state.update { getLoadingState() }
+                _state.update {
+                    try {
+                        val images = getImages(page)
+                        val currentImages = _state.value.images
+                        if (images.none { currentImages.contains(it) }) _state.value.copy(
+                            isLoading = false,
+                            isError = false,
+                            images = currentImages + images
+                        )
+                        else _state.value.copy(isLoading = false, isError = false)
+                    } catch (e: Throwable) {
+                        getErrorState()
+                    }
                 }
             }
-        }
     }
 
+    /**
+     * Probably we switched image as favorite on detail screen.
+     * This method updates just UI part of favorite indicator
+     * with value from SP (faster then DB)
+     */
     private fun refreshSelectedImage() {
         viewModelScope.launch {
             getSelectedImage()?.id?.let { lastSelectedId ->
@@ -119,6 +143,13 @@ class ImagesListViewModel @Inject constructor(
         }
     }
 
+    /**
+     * if we put
+     * @param favorite - image with
+     * @param id will be set to that value.
+     * Else favorite will be switched vice versa.
+     * Just updates UI not touching DB or SP
+     * */
     private fun setOrSwitchFavorite(id: String, favorite: Boolean? = null): ImagesListUiState {
         val images = mutableListOf<ImageUiModel>()
         _state.value.images.forEach {
@@ -127,7 +158,8 @@ class ImagesListViewModel @Inject constructor(
                 else it
             )
         }
-        val imagesFiltered = if(_state.value.showJustFavorites) images.filter { it.favorite } else images
+        val imagesFiltered =
+            if (_state.value.showJustFavorites) images.filter { it.favorite } else images
         return _state.value.copy(
             isLoading = false,
             isError = false,
@@ -135,12 +167,21 @@ class ImagesListViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Method updates UI state
+     * with list of favorite images from DB
+     */
     private fun showJustFavorites() {
         viewModelScope.launch {
             _state.update { getLoadingState() }
             val images = getAllFavoriteImages()
             _state.update {
-                _state.value.copy(isLoading = false, isError = false, images = images, showJustFavorites = true)
+                _state.value.copy(
+                    isLoading = false,
+                    isError = false,
+                    images = images,
+                    showJustFavorites = true
+                )
             }
         }
     }
