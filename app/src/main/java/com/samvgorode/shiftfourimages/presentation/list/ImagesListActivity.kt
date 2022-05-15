@@ -82,7 +82,7 @@ class ImagesListActivity : AppCompatActivity() {
 
     private fun observeViewModel() = lifecycleScope.launch {
         viewModel.state.collect {
-            if(it.images.isNotEmpty()) {
+            if(it.images.isNotEmpty() && it.showJustFavorites.not()) {
                 val paginationLimit = resources.getInteger(R.integer.default_pagination_limit)
                 lastLoadedPage = it.images.size / paginationLimit
             }

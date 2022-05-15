@@ -90,6 +90,7 @@ class ImagesListViewModel @Inject constructor(
 
     // get 10 images for requested page
     private fun getImagesList(page: Int) {
+        if(_state.value.showJustFavorites.not())
         viewModelScope.launch {
             _state.update { getLoadingState() }
             _state.update {
@@ -126,11 +127,11 @@ class ImagesListViewModel @Inject constructor(
                 else it
             )
         }
-
+        val imagesFiltered = if(_state.value.showJustFavorites) images.filter { it.favorite } else images
         return _state.value.copy(
             isLoading = false,
             isError = false,
-            images = if(_state.value.showJustFavorites) images.filter { it.favorite } else images
+            images = imagesFiltered
         )
     }
 
