@@ -37,6 +37,7 @@
             app:srsCoil="@{imageModel.url}" />
 
         <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/favoriteImage"
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="end|bottom"

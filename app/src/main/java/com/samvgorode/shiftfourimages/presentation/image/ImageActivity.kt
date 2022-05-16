@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.lifecycle.lifecycleScope
 import com.samvgorode.shiftfourimages.databinding.ActivityImageBinding
@@ -84,6 +85,8 @@ class ImageActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launch { viewModel.state.collect(uiState::set) }
+        lifecycleScope.launch {
+            viewModel.state.collect(uiState::set)
+        }
     }
 }

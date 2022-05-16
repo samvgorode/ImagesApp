@@ -13,10 +13,6 @@ class ImagesAdapter : ListAdapter<ImageUiModel, HistoryViewHolder>(callback) {
     var favoriteClick: ((String, Boolean) -> Unit)? = null
     var imageClick: ((ImageUiModel) -> Unit)? = null
 
-    init {
-        setHasStableIds(true)
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryViewHolder =
         ImageWidgetBinding
             .inflate(LayoutInflater.from(parent.context), parent, false)
@@ -26,13 +22,19 @@ class ImagesAdapter : ListAdapter<ImageUiModel, HistoryViewHolder>(callback) {
 
 
     override fun onBindViewHolder(holder: HistoryViewHolder, position: Int) {
-        currentList.getOrNull(position)?.let(holder::bind)
+        getItem(position)?.let(holder::bind)
+    }
+
+    override fun onBindViewHolder(
+        holder: HistoryViewHolder,
+        position: Int,
+        payloads: MutableList<Any?>
+    ) {
+        if (payloads.isEmpty()) super.onBindViewHolder(holder, position, payloads)
+        else (payloads.firstOrNull() as? ImageUiModel)?.let(holder::bind)
     }
 
     override fun getItemCount(): Int = currentList.size
-
-    override fun getItemId(position: Int) =
-        currentList.getOrNull(position)?.hashCode()?.toLong() ?: -1L
 
     companion object {
         val callback = object : DiffUtil.ItemCallback<ImageUiModel>() {
@@ -40,9 +42,13 @@ class ImagesAdapter : ListAdapter<ImageUiModel, HistoryViewHolder>(callback) {
                 oldItem.id == newItem.id
 
             override fun areContentsTheSame(oldItem: ImageUiModel, newItem: ImageUiModel): Boolean =
-                oldItem.url == newItem.url &&
-                        oldItem.favorite == newItem.favorite
+                oldItem == newItem
 
+            override fun getChangePayload(
+                oldItem: ImageUiModel,
+                newItem: ImageUiModel
+            ): ImageUiModel? =
+                if (oldItem.favorite != newItem.favorite) newItem else null
         }
     }
 }
@@ -52,7 +58,11 @@ class HistoryViewHolder(private val binding: ImageWidgetBinding) :
     fun bind(imageModel: ImageUiModel) {
         binding.imageModel = imageModel
     }
-    fun setListeners(favoriteClick: ((String, Boolean) -> Unit)?, imageClick: ((ImageUiModel) -> Unit)?) {
+
+    fun setListeners(
+        favoriteClick: ((String, Boolean) -> Unit)?,
+        imageClick: ((ImageUiModel) -> Unit)?
+    ) {
         binding.rootClick = imageClick
         binding.favoriteClick = favoriteClick
     }
